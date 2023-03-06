@@ -1,7 +1,9 @@
-﻿using Key_value_service.Models;
+﻿using Key_value_service.Data;
+using Key_value_service.Models;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Reflection.Metadata;
 
@@ -11,6 +13,12 @@ namespace Key_value_service.Controllers
     [ApiController]
     public class KeyValueController : ControllerBase
     {
+        private readonly KeyValDbContext _keyValDbContext;
+        public KeyValueController(KeyValDbContext keyValDbContext) 
+        {
+            _keyValDbContext= keyValDbContext;
+        }
+
         public static List<KeyValue> keyValues = new()
         {
             new KeyValue{Key = "Krishn", Value= "value1" },
@@ -20,15 +28,16 @@ namespace Key_value_service.Controllers
 
         [HttpGet]
 
-        public IActionResult Get()
+        public async  Task<IActionResult> GetAll()
         {
-            return Ok(keyValues);
+            var keyval = await _keyValDbContext.keyValues.ToListAsync();
+            return Ok(keyval);
         }
 
         [HttpGet ("{Key}")]
-        public IActionResult GetByKey(string key)
+        public async Task<IActionResult> GetByKey(string Key)
         {
-            var keyval = keyValues.Find(x => x.Key == key);
+            var keyval = await _keyValDbContext.keyValues.FirstOrDefaultAsync(x => x.Key == Key);
             if (keyval == null)
             {
                 return NotFound();
@@ -37,55 +46,61 @@ namespace Key_value_service.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateByKeyVal(KeyValue keyval)
+        public async Task<IActionResult> CreateByKeyVal(KeyValue keyval)
         {
-            if (keyValues.Contains(keyval) == true)
+            if (_keyValDbContext.keyValues.Contains(keyval) == true)
             {
                 return Conflict();
             }
-            keyValues.Add(keyval);
-            return Ok(keyValues); // return list
+            await _keyValDbContext.keyValues.AddAsync(keyval);
+            await _keyValDbContext.SaveChangesAsync();
+            return Ok(keyval);
+            
         }
 
         [HttpPut]
-        public IActionResult PutByKeyVal(KeyValue keyval)
+        public async Task<IActionResult> PutByKeyVal(KeyValue keyval)
         {
-            var keyvalinList = keyValues.Find(x => x.Key == keyval.Key);//Finding the value of key
-            if (keyval == null)
+            var keyvalinList = await _keyValDbContext.keyValues.FindAsync(keyval.Key); //Finding the value of key
+            if (keyvalinList == null)
             {
                 return NotFound();
             }
             keyvalinList.Key = keyval.Key;
-            if(keyvalinList.Key.Contains(keyval.Key) == true) 
+            /*if (keyvalinList.Key.Contains(keyval.Key) == true) 
             {
                 return Conflict();
-            }
+            }*/
             keyvalinList.Value = keyval.Value;
+            await _keyValDbContext.SaveChangesAsync();
+
             return Ok(keyvalinList);
         }
 
         [HttpPatch("{Key}")]
-        public IActionResult PatchByKeyVal(string key, KeyValue keyval)
+        public async Task<IActionResult> PatchByKeyVal(string key, KeyValue keyval)
         {
-            var keyvalinList = keyValues.Find(x => x.Key == keyval.Key);
+            var keyvalinList = await _keyValDbContext.keyValues.FindAsync(keyval.Key);
             if (keyval == null)
             {
                 return NotFound();
             }
             keyvalinList.Value = keyval.Value;
+            await _keyValDbContext.SaveChangesAsync();
             return Ok(keyvalinList);    
         }
 
         [HttpDelete]
-        public IActionResult DeleteByKeyVal(string key)
+        public async Task<IActionResult> DeleteByKeyVal(string key)
         {
-            var keyval = keyValues.Find(x => x.Key == key);
+            var keyval = await _keyValDbContext.keyValues.FindAsync(key); 
             if(keyval == null)
             {
                 return NotFound();
             }
-            keyValues.Remove(keyval);
-            return Ok(keyValues);
+            _keyValDbContext.keyValues.Remove(keyval);
+            await _keyValDbContext.SaveChangesAsync();
+            return Ok(keyval);
         }
 
 

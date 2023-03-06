@@ -1,3 +1,6 @@
+using Key_value_service.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,6 +10,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<KeyValDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("KeyValConnectionString"))
+);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
