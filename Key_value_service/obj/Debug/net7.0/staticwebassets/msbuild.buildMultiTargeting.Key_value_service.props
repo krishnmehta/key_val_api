@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Key_value_service.props" />
+</Project>
