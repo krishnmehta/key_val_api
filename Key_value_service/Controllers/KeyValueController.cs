@@ -19,19 +19,14 @@ namespace Key_value_service.Controllers
             _keyValDbContext= keyValDbContext;
         }
 
-        public static List<KeyValue> keyValues = new()
-        {
-            new KeyValue{Key = "Krishn", Value= "value1" },
-            new KeyValue{Key = "John", Value = "value2"},
-            new KeyValue{Key = "Tom", Value = "value3"}
-        };
+        
 
         [HttpGet]
 
         public async  Task<IActionResult> GetAll()
         {
             var keyval = await _keyValDbContext.keyValues.ToListAsync();
-            return Ok(keyval);
+            return Ok(keyval); //return all the values available in database
         }
 
         [HttpGet ("{Key}")]
@@ -46,7 +41,7 @@ namespace Key_value_service.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateByKeyVal(KeyValue keyval)
+        public async Task<IActionResult> CreateByKeyVal(KeyValue keyval) //Creation of new key and value
         {
             if (_keyValDbContext.keyValues.Contains(keyval) == true)
             {
@@ -54,12 +49,12 @@ namespace Key_value_service.Controllers
             }
             await _keyValDbContext.keyValues.AddAsync(keyval);
             await _keyValDbContext.SaveChangesAsync();
-            return Ok(keyval);
+            return Ok(keyval); 
             
         }
 
         [HttpPut]
-        public async Task<IActionResult> PutByKeyVal(KeyValue keyval)
+        public async Task<IActionResult> PutByKeyVal(KeyValue keyval) //Updating
         {
             var keyvalinList = await _keyValDbContext.keyValues.FindAsync(keyval.Key); //Finding the value of key
             if (keyvalinList == null)
@@ -78,7 +73,7 @@ namespace Key_value_service.Controllers
         }
 
         [HttpPatch("{Key}")]
-        public async Task<IActionResult> PatchByKeyVal(string key, KeyValue keyval)
+        public async Task<IActionResult> PatchByKeyVal(string key, KeyValue keyval) //Updating value based on key
         {
             var keyvalinList = await _keyValDbContext.keyValues.FindAsync(keyval.Key);
             if (keyval == null)
@@ -91,7 +86,7 @@ namespace Key_value_service.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteByKeyVal(string key)
+        public async Task<IActionResult> DeleteByKeyVal(string key) //Deleting the key
         {
             var keyval = await _keyValDbContext.keyValues.FindAsync(key); 
             if(keyval == null)
