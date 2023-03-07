@@ -62,10 +62,7 @@ namespace Key_value_service.Controllers
                 return NotFound();
             }
             keyvalinList.Key = keyval.Key;
-            /*if (keyvalinList.Key.Contains(keyval.Key) == true) 
-            {
-                return Conflict();
-            }*/
+            
             keyvalinList.Value = keyval.Value;
             await _keyValDbContext.SaveChangesAsync();
 
